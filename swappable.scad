@@ -66,10 +66,10 @@ module SwitchBase () {
 							DiodeWirePath(15) {
 								translate([8, 0, 0])
 									linear_extrude(3)
-										Circle(1.2);
+										Circle(1.5);
 								translate([10.5, 0, 0])
 									linear_extrude(3)
-										Circle(1.2);
+										Circle(1.5);
 							}
 						}
 
@@ -77,7 +77,7 @@ module SwitchBase () {
 							Path(3)
 								translate([3, 0, 0])
 									linear_extrude(3)
-										Circle(1.2);
+										Circle(1.5);
 					}
 
 					translate([-3.81, 2.54, 0])
@@ -85,14 +85,14 @@ module SwitchBase () {
 							Path(2.5)
 								translate([2.3, 0, 0])
 									linear_extrude(5)
-										Circle(1.2);
+										Circle(1.5);
 
 					translate([-3.81, -7, 0])
 						rotate([0, 0, 90])
 							Path(14) 
 								translate([12, 0, 0])
 									linear_extrude(5)
-										Circle(1.2);
+										Circle(1.5);
 				}
 	}
 }
