@@ -1,166 +1,225 @@
 include<swappable.scad>
 
-thickness = 1.5;
-
-pos_vec = [
-	[[27, 59, 0], [44, 67, 0], [61, 74, 0], [79, 78, 0]], // bottom
-	[[27, 59, 0], [44, 68.5, 0], [62, 76, 0], [80.5, 80.5, 0]], // middle
-	[[27, 59, 0], [45, 69, 0], [65, 78, 0], [85, 83, 0]], // top
-	[[7.5, 6, 0], [20, 26, 0], [41, 35, 0]] // thumb
-];
+plate_scale = 0.046;
+plate_thickness = 1.5;
+switch_base_w = 14;
+switch_block_wall_thickness = 2;
+wall_and_block_depth = switch_base_w + switch_block_wall_thickness;
+switchies_pos = [45, -5, plate_thickness];
+thumb_switchies_pos = [23, -50, plate_thickness];
+switchies_pos_ofs = [45, -5, plate_thickness];
+thumb_pos_ofs = [23, -50, plate_thickness];
+switchies_angle = [0, 0, 20];
+thumb_switchies_angle = [0, 0, 35];
 ofs_vec = [
-	[-0.5, -2, 0], // bottom
-	[-8, 20, 0], // middle
-	[-18, 40, 0], //top
-	[0, 0, 0] // thumb
+	[[0, 0], [0, 0], [0, 0]],// col0
+	[[0, 0], [0, 0], [0, 0]],// col1
+	[[0, 0], [0, 0], [0, 0]],// col2
+	[[0, 0], [0, 0], [0, 0]],// col3
+	[[0, 0], [0, 0], [0, 0]],// col4
 ];
-
+y_ofs_vec = [0, 1.5, -1, -3, -9];
+space_within_switches = [18, 18, 0];
 angle_vec = [
-	[[-8, 0, 17], [-10, 0, 16], [-12, 0, 15], [-14, 0, 14]], // bottom
-	[[0, 0, 28], [0, 0, 24], [0, 0, 17], [0, 0, 14]], // middle
-	[[10, 0, 32], [12, 0, 26], [12, 0, 20], [14, 0, 13]], // top
-	[[0, 0, 63], [0, 0, 39], [0, 0, 15]] //thumb
+	[[30, 0, 0], [0, 0, 0], [0, 0, 0]],// col0
+	[[0, 0, 0], [0, 0, 0], [0, 0, 0]],// col1
+	[[0, 0, 0], [0, 0, 0], [0, 0, 0]],// col2
+	[[0, 0, 0], [0, 0, 0], [0, 0, 0]],// col3
+	[[0, 0, 0], [0, 0, 0], [0, 0, 0]],// col4
 ];
-
 height_vec = [
-	[1, 1, 2, 3],
-	[1, 1, 2, 3],
-	[1, 1, 2, 3],
-	[2, 2, 2]
+	[2, 1, 1],
+	[1, 1, 1],
+	[1, 1, 1],
+	[1, 1, 1],
+	[1, 1, 1],
 ];
+thumb_ofs_vec = [
+	[0, 0],
+	[0, 0],
+	[0, 0]
+];
+thumb_angle_vec = [
+	[0, 0, 0],
+	[0, 0, 0],
+	[0, 0, 0]
+];
+thumb_height_vec = [1, 1, 1];
+space_within_thumb_switches = 20;
+switch_base_thickness = 2.4;
+
+module MockKeySwitch() {
+}
 
 module Switchies(is_mock=true) {
-	if(len(pos_vec) == len(ofs_vec)) {
-		for(i = [0 : len(pos_vec)-1]) {
-			ofs = ofs_vec[i];
-			for(j = [0 : len(pos_vec[i])-1]) {
-				pos = pos_vec[i][j];
+	if(len(ofs_vec)) {
+		for(i = [0 : len(ofs_vec)-1]) {
+			for(j = [0 : len(ofs_vec[i])-1]) {
+				x = space_within_switches[0] * i;
+				y = space_within_switches[1] * j + y_ofs_vec[i];
+				ofs = ofs_vec[i][j];	
 				if(is_mock) {
-					translate(pos + ofs) circle(2);
+					translate([x, y] + ofs) circle(2);
 				} else {
 					angle = angle_vec[i][j];
 					height = height_vec[i][j];
-					translate(pos + ofs) rotate([0, 0, angle[2]]) SwitchBlock(height, angle[0]);
+					translate([x, y] + ofs)
+						rotate([0, 0, angle[2]])
+							SwitchBlock(height, angle[0]);
 				}
-			}
+			}	
 		}
 	}
 }
 
+module ThumbSwitchies(is_mock=true) {
+	if(len(thumb_ofs_vec)) {
+		for(i = [0 : len(thumb_ofs_vec)-1]) {
+			x = space_within_thumb_switches * i;
+			ofs = thumb_ofs_vec[i];
+			if(is_mock) {
+				translate([x, 0] + ofs) circle(2);
+			} else {
+				angle = thumb_angle_vec[i];
+				height = thumb_height_vec[i];
+				translate([x, 0] + ofs)
+					rotate([0, 0, angle[2]])
+						SwitchBlock(height, angle[0]);
+			}
+		}
+	}	
+}
+
 module SwitchBaseWrapper() {
-	switch_base_w = 14;
-	switch_base_thickness = 2.4;
-	delta = 2;
-	w = switch_base_w + delta;
+	w = switch_base_w + switch_block_wall_thickness;
 	difference() {
 		cube([w, switch_base_w, switch_base_thickness/2]);
-		translate([delta/2, delta/2, 0])
+		translate([switch_block_wall_thickness/2, switch_block_wall_thickness/2, 0])
 			cube([switch_base_w, switch_base_w, switch_base_thickness/2]);
 	}
-	translate([delta/2, 0, 0])
+	translate([switch_block_wall_thickness/2, 0, 0])
 		SwitchBase();
 }
 
 module SwitchBlock(height=4, angle=15) {
-	switch_base_w = 14;
-	switch_base_thickness = 2.4;
-	delta = 2;
-	w = switch_base_w + delta;
-	depth = w * cos(angle);
+	block_depth = wall_and_block_depth * cos(angle);
+
+	module EmptyCube(cube_h=height)
+		difference() {
+			cube([wall_and_block_depth, block_depth, cube_h]);
+			translate([switch_block_wall_thickness/2, switch_block_wall_thickness/2, 0])
+				cube([switch_base_w, block_depth - switch_block_wall_thickness, cube_h]);
+		};
+
+	module TopTri() {
+		tri_depth = sqrt(block_depth^2 + (block_depth*sin(angle))^2);
+		color("yellowgreen")
+			translate([0, 0, height])
+				if(angle < 0) {
+						difference() {
+							EmptyCube(wall_and_block_depth * sin(-angle));
+							translate([0, block_depth, 0])
+								rotate([angle, 0, 0])
+								translate([0, -tri_depth, 0])
+								cube([wall_and_block_depth, tri_depth, wall_and_block_depth*sin(-angle)]);
+						}
+				} else {
+						difference() {
+							EmptyCube(wall_and_block_depth * sin(angle));
+							rotate([angle, 0, 0])
+								cube([wall_and_block_depth, tri_depth, wall_and_block_depth*sin(angle)]);
+						}
+				}
+	}
+
+	module BaseMountPick() {
+		pick_depth = sqrt(block_depth^2 + (block_depth*sin(angle))^2);
+		translate([0, 0, height])
+		if(angle < 0) {
+			translate([0, block_depth, 0])
+				rotate([angle, 0, 0])
+				translate([0, -pick_depth, 0])
+				difference() {
+					cube([wall_and_block_depth, wall_and_block_depth, switch_base_thickness/2]);
+					translate([0, switch_block_wall_thickness/2, 0])
+					cube([wall_and_block_depth, switch_base_w, switch_base_thickness/2]);
+				}
+		} else {
+			rotate([angle, 0, 0])
+				difference() {
+					cube([wall_and_block_depth, wall_and_block_depth, switch_base_thickness/2]);
+					translate([0, switch_block_wall_thickness/2, 0])
+					cube([wall_and_block_depth, switch_base_w, switch_base_thickness/2]);
+				}
+		}
+	}
 
 	module Base() {
-		module EmptyCube(cube_h=height)
-			difference() {
-				cube([w, depth, cube_h]);
-				translate([delta/2, delta/2, 0])
-					cube([switch_base_w, depth-delta, cube_h]);
-			};
-		module TopTri() {
-			tri_depth = sqrt(depth^2 + (depth*sin(angle))^2);
-			color("yellowgreen")
-				translate([0, 0, height])
-					if(angle < 0) {
-							difference() {
-								EmptyCube(w * sin(-angle));
-								translate([0, depth, 0])
-									rotate([angle, 0, 0])
-									translate([0, -tri_depth, 0])
-									cube([w, tri_depth, w*sin(-angle)]);
-							}
-					} else {
-							difference() {
-								EmptyCube(w * sin(angle));
-								rotate([angle, 0, 0])
-									cube([w, tri_depth, w*sin(angle)]);
-							}
-					}
-		}
-		module TopPick() {
-			pick_depth = sqrt(depth^2 + (depth*sin(angle))^2);
-			translate([0, 0, height])
-			if(angle < 0) {
-				translate([0, depth, 0])
-					rotate([angle, 0, 0])
-					translate([0, -pick_depth, 0])
-					difference() {
-						cube([w, w, switch_base_thickness/2]);
-						translate([0, delta/2, 0])
-						cube([w, switch_base_w, switch_base_thickness/2]);
-					}
-			} else {
-				rotate([angle, 0, 0])
-					difference() {
-						cube([w, w, switch_base_thickness/2]);
-						translate([0, delta/2, 0])
-						cube([w, switch_base_w, switch_base_thickness/2]);
-					}
-			}
-		}
 		color("plum")
 			EmptyCube();
 		TopTri();
-		TopPick();
+		BaseMountPick();
 	}
 
-	translate([-w/2, -depth/2, 0]) {
+	translate([-wall_and_block_depth/2, -block_depth/2, 0]) {
 		Base();
 	}
 }
 
 module PlateHoles() {
-	switch_base_w = 14;
-	switch_base_thickness = 2.4;
-	delta = 2;
-	w = switch_base_w + delta;
-
-	if(len(pos_vec) == len(ofs_vec)) {
-		for(i = [0 : len(pos_vec)-1]) {
-			ofs = ofs_vec[i];
-			for(j = [0 : len(pos_vec[i])-1]) {
-				pos = pos_vec[i][j];
-				angle = angle_vec[i][j];
-				translate(pos + ofs)
-					rotate([0, 0, angle[2]])
-					square([switch_base_w, switch_base_w*cos(angle[0])], center=true);
+	switch_block_wall_thickness = 2;
+	w = switch_base_w + switch_block_wall_thickness;
+	translate(switchies_pos)
+		rotate(switchies_angle) {
+			if(len(ofs_vec)) {
+				for(i = [0 : len(ofs_vec)-1]) {
+					for(j = [0 : len(ofs_vec[i])-1]) {
+						x = space_within_switches[0] * i;
+						y = space_within_switches[1] * j + y_ofs_vec[i];
+						ofs = ofs_vec[i][j];	
+						angle = angle_vec[i][j];
+						height = height_vec[i][j];
+						translate([x, y] + ofs)
+							rotate([0, 0, angle[2]])
+								square([switch_base_w, switch_base_w*cos(angle[0])], center=true);
+					}	
+				}
 			}
 		}
-	}
+	translate(thumb_switchies_pos)
+		rotate(thumb_switchies_angle) {
+			if(len(thumb_ofs_vec)) {
+				for(i = [0 : len(thumb_ofs_vec)-1]) {
+					x = space_within_thumb_switches * i;
+					ofs = thumb_ofs_vec[i];
+					angle = thumb_angle_vec[i];
+					height = thumb_height_vec[i];
+					translate([x, 0] + ofs)
+						rotate([0, 0, angle[2]])
+							square([switch_base_w, switch_base_w*cos(angle[0])], center=true);
+				}
+			}	
+		}
 }
 
 module KeyBoard() {
-	switches_pos_ofs = [18, -62, thickness];
-	x = 0.046;
-
 	difference() {
 		union() {
-			translate(switches_pos_ofs) color("orange") Switchies(false);
-			linear_extrude(thickness)
+			color("orange")
+				union() {
+					translate(switchies_pos)
+						rotate(switchies_angle)
+						Switchies(false);
+					translate(thumb_switchies_pos)
+						rotate(thumb_switchies_angle)
+						ThumbSwitchies(false);
+				}
+			linear_extrude(plate_thickness)
 					intersection() {
 						translate([0, -100, 0])square(200);
-						rotate([0, 0, 13]) translate([-90, -100, 0]) square(200);
 						difference() {
-							scale([x, x]) import("keyboard.svg", center=true);
-							translate(switches_pos_ofs) PlateHoles();
+							scale([plate_scale, plate_scale]) import("keyboard.svg", center=true);
+							PlateHoles();
 						}
 					}
 		}
@@ -171,11 +230,11 @@ module KeyBoard() {
 module Joint(length=30) {
 	radius = 5;
 	color("orange")
-	linear_extrude(thickness)
+	linear_extrude(plate_thickness)
 	union() {
 		square([length-radius/2, radius], true);
-		translate([length/2 - radius, 0]) circle(radius);	
-		translate([-(length/2 - radius), 0]) circle(radius);	
+		translate([length/2 - radius, 0]) circle(radius, $fn=64);	
+		translate([-(length/2 - radius), 0]) circle(radius, $fn=64);	
 	}
 }
 
@@ -186,8 +245,4 @@ module Joints(n=1) {
 	translate([0, -40, 0])Joint();
 }
 
-
-//translate([-17, 0])Joints();
 KeyBoard();
-//translate([10, 0, 0])SwitchBaseWrapper();
-//SwitchBlock();
