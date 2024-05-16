@@ -1,4 +1,7 @@
 include<swappable.scad>
+
+thickness = 1.5;
+
 pos_vec = [
 	[[27, 59, 0], [44, 67, 0], [61, 74, 0], [79, 78, 0]], // bottom
 	[[27, 59, 0], [44, 68.5, 0], [62, 76, 0], [80.5, 80.5, 0]], // middle
@@ -6,9 +9,9 @@ pos_vec = [
 	[[7.5, 6, 0], [20, 26, 0], [41, 35, 0]] // thumb
 ];
 ofs_vec = [
-	[-0.5, 0, 0], // bottom
+	[-0.5, -2, 0], // bottom
 	[-8, 20, 0], // middle
-	[-18, 38, 0], //top
+	[-18, 40, 0], //top
 	[0, 0, 0] // thumb
 ];
 
@@ -145,23 +148,46 @@ module PlateHoles() {
 }
 
 module KeyBoard() {
-	thickness = 1.5;
 	switches_pos_ofs = [18, -62, thickness];
 	x = 0.046;
 
-	translate(switches_pos_ofs) color("orange") Switchies(false);
-
-	linear_extrude(thickness)
-		intersection() {
-			translate([0, -100, 0])square(200);
-			rotate([0, 0, 13]) translate([-90, -100, 0]) square(200);
-			difference() {
-				scale([x, x]) import("keyboard.svg", center=true);
-				translate(switches_pos_ofs) PlateHoles();
-			}
+	difference() {
+		union() {
+			translate(switches_pos_ofs) color("orange") Switchies(false);
+			linear_extrude(thickness)
+					intersection() {
+						translate([0, -100, 0])square(200);
+						rotate([0, 0, 13]) translate([-90, -100, 0]) square(200);
+						difference() {
+							scale([x, x]) import("keyboard.svg", center=true);
+							translate(switches_pos_ofs) PlateHoles();
+						}
+					}
 		}
+		Joints();
+	}
 }
 
+module Joint(length=30) {
+	radius = 5;
+	color("orange")
+	linear_extrude(thickness)
+	union() {
+		square([length-radius/2, radius], true);
+		translate([length/2 - radius, 0]) circle(radius);	
+		translate([-(length/2 - radius), 0]) circle(radius);	
+	}
+}
+
+module Joints(n=1) {
+	translate([0, 20, 0])Joint();
+	Joint();
+	translate([0, -20, 0])Joint();
+	translate([0, -40, 0])Joint();
+}
+
+
+//translate([-17, 0])Joints();
 KeyBoard();
 //translate([10, 0, 0])SwitchBaseWrapper();
 //SwitchBlock();
