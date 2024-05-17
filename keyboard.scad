@@ -213,28 +213,27 @@ module PlateHoles() {
 }
 
 module KeyBoard() {
-
 	module RightSide() {
-		color("orange")
-					union() {
-						translate(switchies_pos)
-							rotate(switchies_angle)
-							Switchies(false);
-						translate(thumb_switchies_pos)
-							rotate(thumb_switchies_angle)
-							ThumbSwitchies(false);
-					}
+		intersection() {
+			translate([0, -100, 0])cube([200, 200, 200]);
+			translate([-9, 0]) {
+				union() {
+					translate(switchies_pos)
+						rotate(switchies_angle)
+						Switchies(false);
+					translate(thumb_switchies_pos)
+						rotate(thumb_switchies_angle)
+						ThumbSwitchies(false);
+				}
 				linear_extrude(plate_thickness)
-						intersection() {
-							translate([0, -100, 0])square(200);
-							difference() {
-								translate([55,-5])
-									scale([plate_scale, plate_scale])
-										import("keyboard.svg", center=true);
-								PlateHoles();
-							}
+						difference() {
+							translate([55,-5])
+								scale([plate_scale, plate_scale])
+									import("keyboard.svg", center=true);
+							PlateHoles();
 						}
-	
+			}
+		}
 	}
 
 	difference() {
