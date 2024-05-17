@@ -1,6 +1,6 @@
 include<swappable.scad>
 
-plate_scale = 0.046;
+plate_scale = 0.195;
 plate_thickness = 1.5;
 switch_base_w = 14;
 switch_block_wall_thickness = 1;
@@ -213,25 +213,34 @@ module PlateHoles() {
 }
 
 module KeyBoard() {
+
+	module RightSide() {
+		color("orange")
+					union() {
+						translate(switchies_pos)
+							rotate(switchies_angle)
+							Switchies(false);
+						translate(thumb_switchies_pos)
+							rotate(thumb_switchies_angle)
+							ThumbSwitchies(false);
+					}
+				linear_extrude(plate_thickness)
+						intersection() {
+							translate([0, -100, 0])square(200);
+							difference() {
+								translate([55,-5])
+									scale([plate_scale, plate_scale])
+										import("keyboard.svg", center=true);
+								PlateHoles();
+							}
+						}
+	
+	}
+
 	difference() {
 		union() {
-			color("orange")
-				union() {
-					translate(switchies_pos)
-						rotate(switchies_angle)
-						Switchies(false);
-					translate(thumb_switchies_pos)
-						rotate(thumb_switchies_angle)
-						ThumbSwitchies(false);
-				}
-			linear_extrude(plate_thickness)
-					intersection() {
-						translate([0, -100, 0])square(200);
-						difference() {
-							scale([plate_scale, plate_scale]) import("keyboard.svg", center=true);
-							PlateHoles();
-						}
-					}
+			RightSide();
+			mirror([1, 0, 0]) RightSide();
 		}
 		Joints();
 	}
@@ -256,7 +265,3 @@ module Joints(n=1) {
 }
 
 KeyBoard();
-
-// translate([40, 14, 10])
-// color("cyan")
-// 	import("key-cap.stl");
